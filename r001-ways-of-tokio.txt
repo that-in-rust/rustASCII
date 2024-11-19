@@ -202,3 +202,60 @@ async fn main() {
 // specific task pattern - it gives you
 // the freedom to choose the right pattern
 // for each specific use case
+
+Library Crate Pattern:
+┌─────────────────────────────────┐
+│ Don't Use #[tokio::main]        │
+│                                 │
+│ Instead:                        │
+│ 1. Make functions async         │
+│ 2. Let caller provide runtime   │
+│                                 │
+│ Example:                        │
+│ ┌─────────────────┐            │
+│ │ my_library      │            │
+│ │  async fn work()│            │
+│ └────────┬────────┘            │
+│          ▼                      │
+│ ┌─────────────────┐            │
+│ │ application     │            │
+│ │ tokio runtime   │──► work()  │
+│ └─────────────────┘            │
+└─────────────────────────────────┘
+
+Code Example:
+// In library:
+pub async fn process_data(input: &str) -> Result<String, Error> {
+    // Just declare async functions
+    // Don't create runtime
+    todo!() 
+}
+
+// In application:
+#[tokio::main] 
+async fn main() {
+    // Application controls runtime
+    let result = my_library::process_data("input").await;
+}
+
+// 💡 Key Insight:
+// Libraries provide async building blocks
+// Applications assemble and run them
+
+Alternative Patterns:
+┌─────────────────────────────────┐
+│ For Library Testing:            │
+│                                 │
+│ #[tokio::test]                  │
+│ async fn test_my_function() {   │
+│     // Test async code          │
+│ }                               │
+│                                 │
+│ For Library Examples:           │
+│                                 │
+│ #[tokio::main]                  │
+│ async fn main() {               │
+│     // Show usage               │
+│ }                              │
+└─────────────────────────────────┘
+
